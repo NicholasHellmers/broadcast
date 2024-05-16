@@ -1,6 +1,6 @@
 # broadcast
-This is a broadcasting server/client program built in c. This is meant to broadcast binary data to multiple clients.
+This is a streaming server/client program built in c using HLS. This is meant to broadcast binary data to multiple clients.
 
 ## TODO:
-- [ ] Implement an echo server and client using UDP.
-- [ ] Implement simple binary file transfer using UDP from server to client.
+- [ ] Implement an echo server and client using TCP.
+- [ ] Implement simple binary file transfer using TCP from server to client.
