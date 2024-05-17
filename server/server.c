@@ -23,7 +23,7 @@
 #include <errno.h>
 #include <arpa/inet.h>
 
-#define SERV_PORT 3001
+#define SERV_PORT 2000
 #define MAX_CLIENTS 10
 #define MAXLINE 1024
 
@@ -126,13 +126,28 @@ int main(int argc, char *argv[]) {
 
             while ((n = recv(connfd, buf, MAXLINE,0)) > 0) {
                 printf("%s","SERVER --------------:\n");
+
                 printf("%s","String received from and resent to the client:\n");
-                puts(buf);
-                send(connfd, buf, n, 0);
+
+                int fputs_res;
+
+                if ((fputs_res = fputs(buf, stdout)) == EOF) {
+                    perror("fputs error");
+                    exit(1);
+                }
+
+                ssize_t bytes_sent;
+
+                if ((bytes_sent = send(connfd, buf, n, 0)) == -1) {
+                    perror("Problem in sending the data");
+                    exit(2);
+                }
 
                 // clear the buffer
-                memset(buf, 0, MAXLINE);
+                bzero(buf, sizeof(buf));
+
                 printf("%s","SERVER-END --------------:\n");
+
             }
 
             if (n == -1) {

@@ -22,10 +22,10 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
-#define SERV_PORT 3000
+#define SERV_PORT 2000
 #define MAXLINE 1024
 
-// The server to connect to is localhost:80
+// The server to connect to is localhost:2000
 
 int main(int argc, char *argv[]) {
     int sockfd, n;
@@ -61,38 +61,48 @@ int main(int argc, char *argv[]) {
 
     // Set up the server address struct
     servaddr.sin_family = AF_INET;
+    
+    // The server's port number
     servaddr.sin_port = htons(SERV_PORT);
+
     servaddr.sin_addr.s_addr = inet_addr("127.0.0.1"); // Assuming the server is running locally
 
     // Connect to the server
     if (connect(sockfd, (struct sockaddr *) &servaddr, sizeof(servaddr)) == -1) {
         perror("Problem in connecting to the server");
         exit(3);
+    } else {
+        printf("Connected to the server\n");
     }
 
     // Send the HTTP request
-    char *request = "GET /index.m3u8 HTTP/1.1\r\nHost: localhost:3000\r\n\r\n";
+    char *request = "GET /index.m3u8 HTTP/1.1\r\nHost: localhost:2000\r\n\r\n";
 
     ssize_t bytes_sent;
 
     if ((bytes_sent = send(sockfd, request, strlen(request), 0)) == -1) {
         perror("Problem in sending the request");
         exit(4);
+    } else {
+        printf("Sent the request\n");
     }
 
     // Read the response from the server
     while ((n = recv(sockfd, recvline, MAXLINE, 0)) > 0) {
         printf("%s", "CLIENT --------------:\n");
 
-        if (fputs(recvline, stdout) == EOF) {
+        int fputs_res;
+
+        if ((fputs_res = fputs(recvline, stdout)) == EOF) {
             perror("fputs error");
             exit(5);
         }
 
         // Clear the buffer
-        memset(recvline, 0, MAXLINE);
+        bzero(recvline, MAXLINE);
 
         printf("%s", "CLIENT-END --------------:\n");
+
     }
 
     if (n < 0) {
