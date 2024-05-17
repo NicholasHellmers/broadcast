@@ -20,11 +20,14 @@
 #include <netinet/tcp.h> // For TCP keep-alive options
 #include <string.h>
 #include <unistd.h>
+#include <arpa/inet.h>
 
 #define SERV_PORT 3000
 #define MAXLINE 1024
 
-int main(int argc, char *argv) {
+// The server to connect to is localhost:80
+
+int main(int argc, char *argv[]) {
     int sockfd, n;
     char recvline[MAXLINE + 1];
     struct sockaddr_in servaddr;
@@ -41,8 +44,8 @@ int main(int argc, char *argv) {
         printf("Running on an unknown OS\n");
     #endif
 
-    // Create a socket for the soclet
-    // If sockfd<0 there was an error in the creation of the socket
+    // Create a socket for the socket
+    // If sockfd == -1 there was an error in the creation of the socket
     if ((sockfd = socket (AF_INET, SOCK_STREAM, 0)) == -1) {
         perror("Problem in creating the socket");
         exit(2);
@@ -59,7 +62,7 @@ int main(int argc, char *argv) {
     // Set up the server address struct
     servaddr.sin_family = AF_INET;
     servaddr.sin_port = htons(SERV_PORT);
-    servaddr.sin_addr.s_addr = inet_addr(INADDR_ANY);
+    servaddr.sin_addr.s_addr = inet_addr("127.0.0.1"); // Assuming the server is running locally
 
     // Connect to the server
     if (connect(sockfd, (struct sockaddr *) &servaddr, sizeof(servaddr)) == -1) {
@@ -79,15 +82,17 @@ int main(int argc, char *argv) {
 
     // Read the response from the server
     while ((n = recv(sockfd, recvline, MAXLINE, 0)) > 0) {
-        printf("%s", "Received:\n");
-
-        recvline[n] = "\0";
+        printf("%s", "CLIENT --------------:\n");
 
         if (fputs(recvline, stdout) == EOF) {
             perror("fputs error");
             exit(5);
         }
 
+        // Clear the buffer
+        memset(recvline, 0, MAXLINE);
+
+        printf("%s", "CLIENT-END --------------:\n");
     }
 
     if (n < 0) {

@@ -21,12 +21,13 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <arpa/inet.h>
 
-#define SERV_PORT 80
+#define SERV_PORT 3001
 #define MAX_CLIENTS 10
 #define MAXLINE 1024
 
-int main(int argc, char *argv) {
+int main(int argc, char *argv[]) {
     int listenfd, connfd, n;
     pid_t childpid;
     socklen_t clilen;
@@ -47,7 +48,7 @@ int main(int argc, char *argv) {
 
     // Create a socket for the soclet
     // If sockfd<0 there was an error in the creation of the socket
-    if ((listenfd = socket (AF_INET, SOCK_STREAM, 0)) < 0) {
+    if ((listenfd = socket (AF_INET, SOCK_STREAM, 0)) == -1) {
         perror("Problem in creating the socket");
         exit(2);
     }
@@ -78,8 +79,8 @@ int main(int argc, char *argv) {
         servaddr.sin_port = htons(SERV_PORT);
     }
 
-    // Bind the socket
-    if (bind (listenfd, (struct sockaddr *) &servaddr, sizeof(servaddr)) < 0) {
+    //bind the socket
+    if (bind (listenfd, (struct sockaddr *) &servaddr, sizeof(servaddr)) == -1) {
         perror("Problem in binding the socket");
         exit(2);
     }
@@ -116,7 +117,7 @@ int main(int argc, char *argv) {
             continue; // or exit
         }
 
-        printf("Connection from %s, port %d\n", inet_ntop(AF_INET, &cliaddr.sin_addr, buf, sizeof(buf)), ntohs(cliaddr.sin_port));
+        // printf("Connection from %s, port %d\n", cliaddr.sin_addr, cliaddr.sin_port);
 
         if ((childpid = fork()) == 0) { // If it is 0, it is the child process
             printf ("%s\n","Child created for dealing with client requests");
@@ -124,9 +125,14 @@ int main(int argc, char *argv) {
             close(listenfd);
 
             while ((n = recv(connfd, buf, MAXLINE,0)) > 0) {
-                printf("%s","String received from and resent to the client:");
+                printf("%s","SERVER --------------:\n");
+                printf("%s","String received from and resent to the client:\n");
                 puts(buf);
                 send(connfd, buf, n, 0);
+
+                // clear the buffer
+                memset(buf, 0, MAXLINE);
+                printf("%s","SERVER-END --------------:\n");
             }
 
             if (n == -1) {
