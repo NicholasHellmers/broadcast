@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
 
     // Here we check if we're running on macOS or Linux
     #ifdef __APPLE__
-        printf("Running on macOS\n");
+        // printf("Running on macOS\n");
         #define TCP_KEEPIDLE TCP_KEEPALIVE
     #elif __linux__
         printf("Running on Linux\n");
@@ -103,6 +103,7 @@ int main(int argc, char *argv[]) {
 
         printf("%s", "CLIENT-END --------------:\n");
 
+        break;
     }
 
     if (n < 0) {

@@ -36,9 +36,11 @@ int main(int argc, char *argv[]) {
     int optval; // For TCP keep-alive options
     socklen_t optlen = sizeof(optval);
 
+    // Track number of responses given
+
     // Here we check if we're running on macOS or Linux
     #ifdef __APPLE__
-        printf("Running on macOS\n");
+        // printf("Running on macOS\n");
         #define TCP_KEEPIDLE TCP_KEEPALIVE
     #elif __linux__
         printf("Running on Linux\n");
@@ -110,7 +112,7 @@ int main(int argc, char *argv[]) {
             continue; // Depending on how critical this setting is, you might choose to continue or terminate
         }
 
-        optval = 10; // macOS and BSD might use TCP_KEEPALIVE for similar purpose, if you're on Linux, you might want to use TCP_KEEPIDLE instead
+        optval = 3; // macOS and BSD might use TCP_KEEPALIVE for similar purpose, if you're on Linux, you might want to use TCP_KEEPIDLE instead
         if (setsockopt(connfd, IPPROTO_TCP, TCP_KEEPIDLE, &optval, optlen) < 0) {
             perror("setsockopt(TCP_KEEPIDLE) failed on connfd");
             close(connfd);
@@ -147,6 +149,10 @@ int main(int argc, char *argv[]) {
                 bzero(buf, sizeof(buf));
 
                 printf("%s","SERVER-END --------------:\n");
+
+                // Break if there's a keep-alive timeout
+
+                break;
 
             }
 
